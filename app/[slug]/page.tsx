@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
-import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
-import { getAllSlugs, getContentBySlug } from "@/lib/content";
-import { mdxComponents } from "@/components/mdx-components";
+import { getAllSlugs, loadContent } from "@/lib/content";
 
 export const dynamicParams = false;
 
@@ -15,15 +13,15 @@ export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
   const { slug } = await params;
-  const item = await getContentBySlug(slug);
-  if (!item) return {};
+  const mod = await loadContent(slug);
+  if (!mod) return {};
   return {
-    title: item.title,
-    description: item.description,
+    title: mod.title,
+    description: mod.description,
     alternates: { canonical: `/${slug}` },
     openGraph: {
-      title: item.title,
-      description: item.description,
+      title: mod.title,
+      description: mod.description,
       url: `/${slug}`,
       type: "article",
     },
@@ -34,14 +32,15 @@ export default async function ContentPage(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const item = await getContentBySlug(slug);
-  if (!item) notFound();
+  const mod = await loadContent(slug);
+  if (!mod) notFound();
 
+  const Content = mod.default;
   return (
     <article className="prose-content">
-      <h1>{item.title}</h1>
-      <p className="lead text-lg opacity-80 -mt-2">{item.description}</p>
-      <MDXRemote source={item.content} components={mdxComponents} />
+      <h1>{mod.title}</h1>
+      <p className="lead text-lg opacity-80 -mt-2">{mod.description}</p>
+      <Content />
     </article>
   );
 }

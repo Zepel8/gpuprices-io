@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { getAllContent } from "@/lib/content";
+import { getAllContentMeta } from "@/lib/content";
 
 export default async function HomePage() {
-  const items = await getAllContent();
+  const items = await getAllContentMeta();
   return (
     <div>
       <section className="mb-12">

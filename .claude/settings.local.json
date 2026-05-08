@@ -4,7 +4,10 @@
       "PowerShell(node --version)",
       "PowerShell(npm --version)",
       "PowerShell(npm install --no-audit --no-fund --loglevel=error)",
-      "PowerShell(npm run build 2>&1)"
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(npm audit --production 2>&1)",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\")",
+      "PowerShell(npm install remark-gfm --loglevel=error 2>&1)"
     ]
   }
 }

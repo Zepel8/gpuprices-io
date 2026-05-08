@@ -1,50 +1,46 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import matter from "gray-matter";
+import type { ComponentType } from "react";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 
-export type ContentItem = {
+export type ContentModule = {
+  default: ComponentType;
+  title: string;
+  description: string;
+};
+
+export type ContentMeta = {
   slug: string;
   title: string;
   description: string;
-  content: string;
 };
 
-export type ContentMeta = Omit<ContentItem, "content">;
+export async function getAllSlugs(): Promise<string[]> {
+  const entries = await fs.readdir(CONTENT_DIR);
+  return entries
+    .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"))
+    .map((f) => f.replace(/\.(mdx|md)$/, ""))
+    .sort();
+}
 
-async function readMdxFile(slug: string): Promise<ContentItem | null> {
-  const file = path.join(CONTENT_DIR, `${slug}.mdx`);
+export async function loadContent(slug: string): Promise<ContentModule | null> {
   try {
-    const raw = await fs.readFile(file, "utf8");
-    const { data, content } = matter(raw);
-    return {
-      slug,
-      title: String(data.title ?? slug),
-      description: String(data.description ?? ""),
-      content,
-    };
+    const mod = (await import(`../content/${slug}.mdx`)) as ContentModule;
+    return mod;
   } catch {
     return null;
   }
 }
 
-export async function getAllSlugs(): Promise<string[]> {
-  const entries = await fs.readdir(CONTENT_DIR);
-  return entries
-    .filter((f) => f.endsWith(".mdx"))
-    .map((f) => f.replace(/\.mdx$/, ""))
-    .sort();
-}
-
-export async function getContentBySlug(slug: string): Promise<ContentItem | null> {
-  return readMdxFile(slug);
-}
-
-export async function getAllContent(): Promise<ContentMeta[]> {
+export async function getAllContentMeta(): Promise<ContentMeta[]> {
   const slugs = await getAllSlugs();
-  const items = await Promise.all(slugs.map(readMdxFile));
-  return items
-    .filter((x): x is ContentItem => x !== null)
-    .map(({ content: _content, ...meta }) => meta);
+  const items = await Promise.all(
+    slugs.map(async (slug) => {
+      const mod = await loadContent(slug);
+      if (!mod) return null;
+      return { slug, title: mod.title, description: mod.description };
+    }),
+  );
+  return items.filter((x): x is ContentMeta => x !== null);
 }
