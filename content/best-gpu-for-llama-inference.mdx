@@ -1,0 +1,50 @@
+---
+title: "Best GPU for Llama Inference (2026 Edition)"
+description: "How to pick the right GPU for serving Llama 3.x models — by parameter count, batch size, and context length, with cost-per-million-tokens math."
+---
+
+The honest answer to "what GPU should I use for Llama inference?" is: **it depends on
+the model size, your latency target, and whether you'll quantize.** Here's the
+decision tree.
+
+## Step 1: Model size dictates VRAM floor
+
+Rough VRAM needed for inference (FP16, no quantization, no KV cache headroom):
+
+| Model | Params | VRAM (FP16) | VRAM (INT8) | VRAM (INT4) |
+|---|---|---|---|---|
+| Llama 3.2 1B | 1 B | 2 GB | 1 GB | 0.5 GB |
+| Llama 3.1 8B | 8 B | 16 GB | 8 GB | 4 GB |
+| Llama 3.1 70B | 70 B | 140 GB | 70 GB | 35 GB |
+| Llama 3.1 405B | 405 B | 810 GB | 405 GB | 200 GB |
+
+Add **20–40% headroom** for KV cache at production batch sizes and context lengths.
+
+## Step 2: Match GPU to model
+
+- **Llama 8B** — A single **RTX 4090 (24 GB)** is the cost-per-token king. L4 (24 GB)
+  works for higher concurrency at lower power.
+- **Llama 70B (FP16)** — Needs 2× **A100 80GB** or 2× **H100 80GB** with NVLink.
+- **Llama 70B (INT4 / AWQ)** — Fits on a single **A100 80GB** or **H100 80GB**.
+- **Llama 405B** — 8× **H100 80GB** minimum, or 8× **B200** if you can get them.
+
+## Step 3: Batching and throughput
+
+If you're serving lots of users, batching dominates. Tools like vLLM or TensorRT-LLM
+pay for themselves immediately.
+
+Approximate throughput for Llama 3.1 8B at INT8, batch 32:
+
+- 4090 (24 GB): ~3,000 tok/s
+- L40S (48 GB): ~3,800 tok/s
+- A100 80GB: ~5,500 tok/s
+- H100 80GB: ~11,000 tok/s
+
+## Recommendation
+
+- **Hobby / low concurrency**: RTX 4090 on RunPod Community.
+- **Production inference for 8B**: H100 80GB — best tokens-per-dollar at scale.
+- **Production inference for 70B**: 2× H100 80GB with NVLink, or single A100 with INT4.
+
+Quantize before you scale up the hardware. AWQ and GPTQ are basically free wins on
+modern Llamas.

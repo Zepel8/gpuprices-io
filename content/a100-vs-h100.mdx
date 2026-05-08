@@ -1,0 +1,45 @@
+---
+title: "A100 vs H100: Is the H100 Worth 2x the Price?"
+description: "Comparing NVIDIA A100 and H100 on raw FLOPs, memory bandwidth, real inference throughput, and total cost per million tokens."
+---
+
+The H100 launched as NVIDIA's first Hopper-architecture datacenter GPU and has spent the
+last two years redefining what's possible in transformer inference. The A100 is still
+everywhere — cheaper, plentiful, and battle-tested. So which one should you actually rent?
+
+## Spec-sheet TL;DR
+
+| | A100 80GB | H100 80GB |
+|---|---|---|
+| Architecture | Ampere | Hopper |
+| FP16 Tensor Core | 312 TFLOPS | 989 TFLOPS |
+| FP8 Tensor Core | — | 1,979 TFLOPS |
+| HBM | 80 GB HBM2e | 80 GB HBM3 |
+| Memory bandwidth | 2.0 TB/s | 3.35 TB/s |
+| NVLink | 600 GB/s | 900 GB/s |
+| Typical rent | ~$1.20–1.90/hr | ~$2.50–3.50/hr |
+
+## Where the H100 wins
+
+For modern transformer workloads — Llama 3, DeepSeek, Mixtral, large embedding models —
+the H100 is roughly **2.0–2.5× faster** than an A100 at FP16, and **3–4× faster** when
+you can use FP8 (Hopper's Transformer Engine).
+
+If your workload is bandwidth-bound (most LLM decode is), the 1.7× memory-bandwidth
+advantage shows up directly in tokens/sec.
+
+## Where the A100 wins
+
+- **Cost per token** at FP16 is often a wash because the H100 costs ~2× to rent.
+- **Availability**: A100s are everywhere; H100s still get queued during demand spikes.
+- **Mature tooling**: every framework has been tuned for A100 for years.
+
+## Practical guidance
+
+- **Pick A100** for development, smaller fine-tunes, embedding pipelines, or when FP8
+  isn't yet supported in your stack.
+- **Pick H100** for high-throughput production inference, large-context generation, or
+  any path where FP8 quantization is on the table.
+
+Run the napkin math: H100 hourly cost ÷ tokens per hour. If FP8 is on the table, H100
+usually wins on cost per million tokens despite the higher sticker price.

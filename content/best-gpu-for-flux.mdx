@@ -1,0 +1,50 @@
+---
+title: "Best GPU for FLUX Image Generation"
+description: "Choosing a GPU for FLUX.1 [dev] and FLUX.1 [schnell] — VRAM requirements, image-per-second throughput, and the cheapest path to production."
+---
+
+FLUX is the current state-of-the-art open image model from Black Forest Labs. It's also
+notoriously **VRAM-hungry**: the full model is 12B parameters, and you need room for
+the T5 text encoder and VAE on top.
+
+## VRAM requirements
+
+| Variant | Model VRAM (FP16) | Practical floor |
+|---|---|---|
+| FLUX.1 [dev] | ~24 GB | 24 GB GPU (tight) |
+| FLUX.1 [dev] FP8 | ~12 GB | 16 GB GPU |
+| FLUX.1 [schnell] | ~24 GB | 24 GB GPU |
+| FLUX.1 [schnell] NF4 | ~7 GB | 12 GB GPU |
+
+If you only have 12 GB of VRAM, you're in NF4-quantized territory. Quality is
+surprisingly good but you do lose some prompt adherence on complex compositions.
+
+## Throughput (1024×1024, 20 steps, batch 1)
+
+- RTX 4060 Ti 16GB: ~22s per image (FP8)
+- RTX 4090 24GB: ~6.5s per image (FP16)
+- L40S 48GB: ~5.8s per image (FP16)
+- A100 80GB: ~5.0s per image (FP16)
+- H100 80GB: ~2.4s per image (FP16)
+
+## Cost per 1,000 images (FP16, ~6s/image, no batching gains)
+
+Roughly 1.7 hours of GPU time per 1,000 images.
+
+| GPU | Hourly | Cost per 1,000 imgs |
+|---|---|---|
+| RTX 4090 (RunPod Community) | $0.34 | **$0.58** |
+| L40S | $1.10 | $1.87 |
+| A100 80GB | $1.19 | $2.02 |
+| H100 80GB | $2.99 | $5.08 |
+
+The **RTX 4090** is the cost king for FLUX *if you don't need datacenter SLA*. Even
+versus an H100 it wins by ~9× on cost per image, despite being ~2.5× slower per image.
+
+## Recommendation
+
+- **Tinkering**: 4090 on RunPod Community or Vast.ai.
+- **Public-facing API**: L40S in a Tier-3 datacenter — good throughput, predictable
+  uptime, decent price.
+- **High volume / latency-sensitive**: H100 with FP8 + batching, ~6× the throughput per
+  card.

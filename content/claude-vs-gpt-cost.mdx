@@ -1,0 +1,47 @@
+---
+title: "Claude vs GPT Token Cost: Which API Is Cheaper in 2026?"
+description: "Side-by-side pricing for Claude and GPT models in 2026 — input, output, and cached tokens — plus napkin math for common workload patterns."
+---
+
+API token pricing changes constantly. As of 2026, here's where Anthropic's Claude family
+and OpenAI's GPT family land for builders trying to estimate cost.
+
+## Per-million-token pricing (USD)
+
+| Model | Input | Output | Cached input |
+|---|---|---|---|
+| Claude Opus 4.7 | $15.00 | $75.00 | $1.50 |
+| Claude Sonnet 4.6 | $3.00 | $15.00 | $0.30 |
+| Claude Haiku 4.5 | $1.00 | $5.00 | $0.10 |
+| GPT-5 | $10.00 | $40.00 | $1.00 |
+| GPT-5 mini | $1.25 | $5.00 | $0.13 |
+| GPT-4o | $2.50 | $10.00 | $1.25 |
+| GPT-4o mini | $0.15 | $0.60 | $0.075 |
+
+> Numbers above reflect publicly listed list-pricing as of early 2026; check provider
+> dashboards for current rates before sizing a budget.
+
+## Napkin math: a chat workload
+
+Assume 500 input tokens, 300 output tokens, no caching, 100,000 requests/month.
+
+- **Claude Sonnet 4.6**: 50M in + 30M out = $150 + $450 = **$600/mo**
+- **GPT-4o**: 50M in + 30M out = $125 + $300 = **$425/mo**
+- **GPT-4o mini**: 50M in + 30M out = $7.50 + $18 = **$25.50/mo**
+- **Claude Haiku 4.5**: 50M in + 30M out = $50 + $150 = **$200/mo**
+
+For a chat sidekick where occasional sub-frontier quality is fine, the **mini/haiku
+tier is a 10–25× cost reduction** vs. the flagship tier.
+
+## Where caching changes everything
+
+Long system prompts (5K+ tokens) get hit on every request. Prompt caching brings input
+cost down by ~10× on Claude and ~10× on GPT-5. For agents with large tool descriptions
+or RAG context, this is the single biggest lever.
+
+## Recommendation
+
+- **Default**: Sonnet 4.6 or GPT-5 — best quality-per-dollar in the middle tier.
+- **High volume, simple tasks**: Haiku 4.5 or GPT-4o mini.
+- **Hardest reasoning**: Opus 4.7 or GPT-5 — pay the premium only where it earns its keep.
+- **Always**: Cache long system prompts. Always.
