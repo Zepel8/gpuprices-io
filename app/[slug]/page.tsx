@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getAllSlugs, loadContent } from "@/lib/content";
+import { getAllSlugs, getMetaBySlug, loadContent } from "@/lib/content";
 
 export const dynamicParams = false;
 
@@ -13,15 +13,15 @@ export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
   const { slug } = await params;
-  const mod = await loadContent(slug);
-  if (!mod) return {};
+  const meta = await getMetaBySlug(slug);
+  if (!meta) return {};
   return {
-    title: mod.title,
-    description: mod.description,
+    title: meta.title,
+    description: meta.description,
     alternates: { canonical: `/${slug}` },
     openGraph: {
-      title: mod.title,
-      description: mod.description,
+      title: meta.title,
+      description: meta.description,
       url: `/${slug}`,
       type: "article",
     },

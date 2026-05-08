@@ -19,9 +19,36 @@ export type ContentMeta = {
 export async function getAllSlugs(): Promise<string[]> {
   const entries = await fs.readdir(CONTENT_DIR);
   return entries
-    .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"))
-    .map((f) => f.replace(/\.(mdx|md)$/, ""))
+    .filter((f) => f.endsWith(".mdx"))
+    .map((f) => f.replace(/\.mdx$/, ""))
     .sort();
+}
+
+function extractExport(source: string, name: string): string | undefined {
+  const re = new RegExp(
+    `^export\\s+const\\s+${name}\\s*=\\s*("(?:[^"\\\\]|\\\\.)*")\\s*;?\\s*$`,
+    "m",
+  );
+  const m = source.match(re);
+  if (!m) return undefined;
+  try {
+    return JSON.parse(m[1]) as string;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function getMetaBySlug(slug: string): Promise<ContentMeta | null> {
+  try {
+    const file = path.join(CONTENT_DIR, `${slug}.mdx`);
+    const raw = await fs.readFile(file, "utf8");
+    const title = extractExport(raw, "title");
+    const description = extractExport(raw, "description");
+    if (!title || !description) return null;
+    return { slug, title, description };
+  } catch {
+    return null;
+  }
 }
 
 export async function loadContent(slug: string): Promise<ContentModule | null> {
@@ -35,12 +62,6 @@ export async function loadContent(slug: string): Promise<ContentModule | null> {
 
 export async function getAllContentMeta(): Promise<ContentMeta[]> {
   const slugs = await getAllSlugs();
-  const items = await Promise.all(
-    slugs.map(async (slug) => {
-      const mod = await loadContent(slug);
-      if (!mod) return null;
-      return { slug, title: mod.title, description: mod.description };
-    }),
-  );
+  const items = await Promise.all(slugs.map((slug) => getMetaBySlug(slug)));
   return items.filter((x): x is ContentMeta => x !== null);
 }
