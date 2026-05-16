@@ -1,5 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getAllContentMeta } from "@/lib/content";
+
+export const metadata: Metadata = {
+  title: "GPU Pricing Comparison for AI Workloads",
+  description:
+    "Compare GPU cloud pricing, VRAM requirements, and AI workload costs across popular GPUs and providers.",
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   const items = await getAllContentMeta();
@@ -7,11 +15,11 @@ export default async function HomePage() {
     <div>
       <section className="mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-3">
-          GPU Prices &amp; AI Infrastructure, Compared.
+          GPU Pricing Comparison for AI Workloads
         </h1>
         <p className="text-lg opacity-80">
-          Practical comparisons, benchmarks, and token-cost breakdowns for builders shipping
-          AI workloads. No fluff, just numbers.
+          Compare GPU cloud pricing, VRAM requirements, benchmarks, and token-cost
+          tradeoffs for builders shipping AI workloads. No fluff, just numbers.
         </p>
       </section>
 

@@ -1,0 +1,63 @@
+export const title = "FLUX.1 Schnell VRAM Requirements"
+export const description = "How much VRAM FLUX.1 schnell needs for local image generation, from 12 GB quantized setups to comfortable 24 GB GPUs."
+
+FLUX.1 schnell is the fast, open-weight FLUX variant most builders test first. The
+practical question is simple: can your GPU load it without offloading half the pipeline
+to system RAM?
+
+## Quick answer
+
+FLUX.1 schnell is a 12B parameter model, so the weights alone are large. For a normal
+local workflow, plan around a **24 GB GPU** if you want a comfortable experience.
+That usually means FP8 or selective offload for supporting components rather than
+keeping every part of the pipeline in full precision on the GPU.
+
+For quantized workflows, **12 GB can work**, but it usually means NF4 or similar
+quantization, more careful ComfyUI settings, and less headroom for high resolutions or
+larger batches.
+
+| Setup | Practical VRAM target | Best fit |
+|---|---:|---|
+| Comfortable local workflow | 24 GB | RTX 4090, RTX 3090, L40S |
+| FP8 / mixed precision | 16 GB | RTX 4080, RTX 4060 Ti 16GB |
+| NF4 quantized | 12 GB | RTX 3060 12GB, RTX 4070 12GB |
+| CPU offload | 8 GB | Testing only, slow |
+
+## What changes VRAM usage
+
+Resolution matters. A 1024x1024 image is the common baseline, but larger canvases,
+hires fix workflows, ControlNet-style extras, and batching all raise memory use.
+
+The text encoder also matters. Many low-VRAM guides focus only on the FLUX transformer
+weights, but the T5 encoder and VAE still need memory unless they are offloaded or
+loaded in reduced precision.
+
+## Recommended GPUs
+
+If you are renting cloud GPUs, an RTX 4090 is usually the best price/performance
+choice for FLUX.1 schnell. It has enough VRAM for a practical production-style setup
+and is often far cheaper per hour than A100 or H100 instances.
+
+If you are running locally, a 24 GB consumer GPU is the comfortable tier. A 12 GB card
+is viable for experimentation, but expect to use quantized checkpoints and more
+conservative settings.
+
+## Local vs cloud
+
+| Goal | Recommendation |
+|---|---|
+| Cheapest local testing | 12 GB GPU with NF4 quantized workflow |
+| Smooth local use | 24 GB GPU |
+| Cheapest cloud generation | RTX 4090 community instance |
+| Production API | L40S or datacenter 4090 provider |
+
+## Bottom line
+
+Use **24 GB** as the clean answer for FLUX.1 schnell. Treat **12 GB** as the budget
+answer if you are comfortable with quantization and occasional workflow tuning.
+
+Source note: Black Forest Labs' model card describes FLUX.1 schnell as a 12B parameter
+rectified flow transformer. The VRAM guidance above is practical deployment guidance,
+not an official minimum.
+
+Related reading: [Best GPU for FLUX Image Generation](/best-gpu-for-flux).
