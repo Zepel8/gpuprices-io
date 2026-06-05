@@ -1,0 +1,55 @@
+export const title = "FLUX.1 Dev VRAM Requirements"
+export const description = "How much VRAM FLUX.1 Dev needs for local image generation — from full FP16 on a 24 GB GPU to quantized workflows on 12–16 GB cards."
+
+# FLUX.1 Dev VRAM Requirements
+
+FLUX.1 Dev is the guidance-distilled sibling of [FLUX.1 Schnell](/flux-1-schnell-vram-requirements) — slower per step, higher prompt adherence, and heavier on VRAM. Same 12B parameter architecture, but the recommended headroom is higher.
+
+## Requirements at a glance
+
+| Precision | Minimum VRAM | Comfortable VRAM | Notes |
+|---|---:|---:|---|
+| FP16 full precision | 24 GB | **24 GB+** | Hard floor for high-res without offload |
+| FP8 mixed precision | 16 GB | **16 GB** | Good balance of quality and speed |
+| NF4 / INT8 quantized | 12 GB | **16 GB** | Works, but slower and lower throughput |
+| CPU offload | 8 GB | — | Testing only |
+
+**System RAM:** 32 GB minimum regardless of precision. Model loading and VAE operations pull from system memory during pipeline initialization.
+
+---
+
+## FP16 — full precision
+
+- **Required VRAM: 24 GB**
+- **GPUs:** RTX 3090 24GB, RTX 4090 24GB
+- This is the baseline for production-quality workflows — high-res outputs (1024×1024 and above), larger batch sizes, and ControlNet-style extensions all need the full 24 GB buffer.
+- Below 24 GB at FP16, you will hit OOM errors on anything beyond the smallest canvas sizes.
+
+## FP8 — mixed precision
+
+- **Required VRAM: 16 GB**
+- **GPUs:** RTX 4080 16GB, RTX 4060 Ti 16GB
+- FP8 inference with Diffusers or ComfyUI's built-in quantization keeps quality close to FP16 while fitting on a 16 GB card.
+- Expect roughly 10–20% slower generation vs. FP16 on a 24 GB card, mostly due to dequantization overhead.
+
+## NF4 / INT8 — quantized
+
+- **Required VRAM: 12 GB**
+- **GPUs:** RTX 4070 Ti Super 16GB, RTX 4070 12GB, RTX 3060 12GB
+- Viable for experimentation and low-volume generation. Not ideal for iterative workflows where you're generating dozens of images.
+- Generation speed takes a notable hit at 12 GB — plan for longer wait times per image compared to the 24 GB FP16 path.
+- High-resolution outputs (1280×1280+) will likely require resolution compromises or tiled generation.
+
+---
+
+## FLUX.1 Dev vs Schnell — VRAM difference
+
+Both models share the same 12B parameter count, so raw weight size is identical. The VRAM gap comes from workflow differences:
+
+- Dev typically runs more steps (20–50 vs. Schnell's 1–4), which means more intermediate activations in memory simultaneously.
+- Dev workflows often include guidance embedding, which adds a small but consistent overhead.
+- In practice: if [FLUX.1 Schnell](/flux-1-schnell-vram-requirements) runs smoothly on your GPU, Dev will work too — but expect tighter margins and slower generation.
+
+---
+
+Need cheap 24 GB VRAM cloud instances for FLUX.1 Dev? [Compare current rental prices across RunPod, Vast.ai, and other providers on the homepage.](/)

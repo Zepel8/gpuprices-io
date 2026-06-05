@@ -7,7 +7,14 @@
       "PowerShell(npm run build 2>&1)",
       "PowerShell(npm audit --production 2>&1)",
       "PowerShell(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\")",
-      "PowerShell(npm install remark-gfm --loglevel=error 2>&1)"
+      "PowerShell(npm install remark-gfm --loglevel=error 2>&1)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
+      "Bash(wmic process *)",
+      "Bash(taskkill //F //PID 4488 //PID 10548 //PID 18044 //PID 16488)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts\\)\\)\")",
+      "Bash(timeout 60 npm run lint)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

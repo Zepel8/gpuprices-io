@@ -1,0 +1,59 @@
+export const title = "DeepSeek R1 VRAM & GPU Requirements"
+export const description = "How much VRAM each DeepSeek R1 variant needs — from the 8B distilled model on a single consumer GPU to the full 671B running across H100 clusters."
+
+# DeepSeek R1 VRAM & GPU Requirements
+
+DeepSeek R1 comes in several sizes. The distilled variants run on consumer hardware; the full model does not. Here is what you actually need for each one.
+
+## Model variants at a glance
+
+| Model | Parameters | Minimum VRAM | Comfortable setup |
+|---|---:|---:|---|
+| R1 8B (Distilled) | 8B | 6 GB (Q4) | **8 GB** |
+| R1 14B (Distilled) | 14B | 10 GB (Q4) | **16 GB** |
+| R1 32B (Distilled) | 32B | 18 GB (Q4) | **24 GB** |
+| R1 70B (Distilled) | 70B | 35 GB (Q4) | **48 GB** |
+| R1 Full | 671B | ~320 GB (FP8) | **640 GB+** |
+
+---
+
+## DeepSeek R1 8B (Distilled)
+
+- **Recommended VRAM:** 8 GB+
+- **Good GPUs:** RTX 4060 8GB, RTX 3070 8GB
+- Runs comfortably at 4-bit quantization on any modern 8 GB card.
+- Full BF16 needs ~16 GB; stick to Q4/Q5 for 8 GB cards.
+
+## DeepSeek R1 14B (Distilled)
+
+- **Recommended VRAM:** 16 GB
+- **Good GPUs:** RTX 4080 16GB, RTX 4060 Ti 16GB
+- Q4 fits in 10–12 GB but expect slower generation; 16 GB gives you headroom for longer contexts.
+
+## DeepSeek R1 32B (Distilled)
+
+- **Recommended VRAM:** 24 GB+
+- **Good GPUs:** RTX 3090 24GB, RTX 4090 24GB
+- Q4 can squeeze into ~18–20 GB, but 24 GB is the practical minimum for a usable workflow.
+- Long reasoning chains (R1's strong suit) consume extra KV cache — headroom matters here.
+
+Can't run 32B locally? [Compare RunPod, Vast.ai, and other cloud GPU rental prices on the homepage.](/)
+
+## DeepSeek R1 70B (Distilled)
+
+- **Recommended VRAM:** 48 GB+
+- **Good GPUs:** 2× RTX 3090 (NVLink), 1× RTX A6000 48GB, 1× L40S 48GB
+- At Q4 you can squeeze by on ~35–40 GB, but a single 48 GB card is the cleanest single-node option.
+- Dual RTX 3090 via NVLink is the cheapest path to 48 GB on consumer hardware.
+
+For multi-GPU cloud rentals at reasonable hourly rates, [see the GPU rental comparison on the homepage.](/)
+
+## DeepSeek R1 Full (671B)
+
+- **Recommended VRAM:** 640 GB+ (FP16/BF16)
+- **Practical minimum:** ~320 GB at FP8 across multiple nodes
+- **Typical cloud setup:** 8× H100 80GB SXM, or 8× A100 80GB
+- This is not a local-deployment model. Even Q4 quantized weighs ~335 GB.
+- Expect to pay $20–$50/hr on cloud infrastructure for inference at this scale.
+
+This tier is cloud-only for virtually everyone. [Compare H100 and A100 cluster pricing across providers.](/)
