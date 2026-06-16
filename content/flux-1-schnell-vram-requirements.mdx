@@ -5,6 +5,8 @@ FLUX.1 schnell is the fast, open-weight FLUX variant most builders test first. T
 practical question is simple: can your GPU load it without offloading half the pipeline
 to system RAM?
 
+If you are checking VRAM requirements because you are deciding which card to buy, see our dedicated guide to the [Best GPU for FLUX Image Generation](/best-gpu-for-flux). It compares practical GPU value for FLUX workloads, not just whether a card can technically run the model.
+
 ## Quick answer
 
 FLUX.1 schnell is a 12B parameter model, so the weights alone are large. For a normal
@@ -16,12 +18,13 @@ For quantized workflows, **12 GB can work**, but it usually means NF4 or similar
 quantization, more careful ComfyUI settings, and less headroom for high resolutions or
 larger batches.
 
-| Setup | Practical VRAM target | Best fit |
-|---|---:|---|
-| Comfortable local workflow | 24 GB | RTX 4090, RTX 3090, L40S |
-| FP8 / mixed precision | 16 GB | RTX 4080, RTX 4060 Ti 16GB |
-| NF4 quantized | 12 GB | RTX 3060 12GB, RTX 4070 12GB |
-| CPU offload | 8 GB | Testing only, slow |
+## FLUX.1 Schnell VRAM tiers at a glance
+
+| VRAM tier | What it can run | Practical expectation |
+|---|---|---|
+| **Minimum: 8GB VRAM** | Highly quantized builds such as GGUF or NF4 | Barely viable for local testing. Expect slower generation, CPU offload, tighter resolution limits, and more workflow tuning. |
+| **Recommended: 12GB-16GB VRAM** | FP8 or carefully optimized quantized workflows | The best practical range for most users, with better speed and fewer memory workarounds than an 8GB setup. |
+| **Comfortable: 24GB+ VRAM** | Full FP16 workflows on GPUs such as the RTX 3090 or RTX 4090 | Smoothest experience, fastest generation, and the most headroom for larger images or heavier ComfyUI pipelines. |
 
 ## What changes VRAM usage
 
@@ -61,3 +64,11 @@ rectified flow transformer. The VRAM guidance above is practical deployment guid
 not an official minimum.
 
 Related reading: [Best GPU for FLUX Image Generation](/best-gpu-for-flux).
+
+## Can You Run FLUX.1 Schnell on a 2GB/4GB VRAM GPU?
+
+No. A GTX 1050 2GB, GTX 1650 4GB, or any GPU with less than 8 GB of VRAM cannot load FLUX.1 schnell locally under any configuration. There is no workaround that makes this viable.
+
+The reason is weight size, not just architecture. FLUX.1 schnell is a 12B parameter transformer. Even the most aggressive quantization—4-bit GGUF or NF4—compresses the transformer weights to roughly 6–7 GB on disk. Add the T5-XXL text encoder (~3 GB at 8-bit) and the VAE (~335 MB), and you are already past 9 GB before a single inference step allocates activation memory. The absolute floor for any functional local run is **8 GB VRAM**, and at that level you are CPU-offloading the text encoder, accepting 3–5 minutes per image, and hitting OOM errors at resolutions above 768×768. **12 GB is the practical minimum** for a usable quantized workflow; 16–24 GB is where generation becomes fast enough to matter.
+
+If your GPU does not meet that bar, cloud rental is the cheapest path. A spot instance with an RTX 3090 (24 GB) or RTX 4090 (24 GB) runs **$0.20–$0.40/hr** on competitive platforms—enough for dozens of generations before you spend a dollar. For a breakdown of which platform prices lower on which GPU tiers, see the [RunPod vs Vast.ai comparison](/runpod-vs-vast).
