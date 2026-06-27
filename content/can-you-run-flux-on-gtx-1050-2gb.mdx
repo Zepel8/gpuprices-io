@@ -10,20 +10,35 @@ Here is the hard truth: **you cannot natively run FLUX.1 on a 2GB or 4GB GPU.**
 No fluff, just numbers. Let's break down the exact VRAM math, why your older GPU is
 struggling, and what your actual cheapest alternatives are.
 
-## The VRAM math: why 2GB/4GB is a dead end for FLUX
+## Flux Schnell Minimum VRAM Requirements
 
-FLUX.1 is a massive model. Even the distilled FLUX.1 [schnell] version demands
-significant memory.
+**Short answer: 8GB VRAM is the absolute floor for running FLUX.1 Schnell locally with
+aggressive 4-bit quantization.**
 
-- **The baseline:** Running the standard FP8 version of FLUX.1 usually requires around
-  **12GB to 16GB of VRAM** for a practical local workflow.
-- **The extreme quantization illusion:** You might have heard of 4-bit quantization,
-  such as GGUF or NF4, designed to squeeze models onto smaller cards. Even with
-  aggressive quantization, the practical VRAM floor just to load FLUX and complete
-  image generation without constant crashes is around **8GB**.
+That means GGUF, NF4, or similar low-VRAM builds. Even then, 8GB is not comfortable.
+It is the minimum line where a local run can become possible with compromises like
+CPU offload, lower resolutions, slower generation, and careful ComfyUI settings.
 
-If your GPU only has 2GB or 4GB, the model architecture physically cannot fit into
-your hardware in a useful local workflow.
+| GPU VRAM | FLUX.1 Schnell local result | Reality |
+| --- | --- | --- |
+| **2GB VRAM** | No | Will hit OOM before a usable native or quantized workflow. |
+| **4GB VRAM** | No | Still below the model floor. Expect VRAM crashes, not generation. |
+| **8GB VRAM** | Bare minimum | Possible only with 4-bit quantized builds such as GGUF/NF4 plus tradeoffs. |
+| **12GB-16GB VRAM** | Practical budget range | Much better chance of stable local generation. |
+| **24GB VRAM** | Comfortable | Best value target for serious FLUX.1 Schnell work. |
+
+A GTX 1050 2GB is not a hidden budget win for FLUX.1. Neither is a 4GB card. The issue
+is not driver tuning or one magic launch flag. The model, text encoder, VAE, and
+activation memory exceed what these cards can hold.
+
+If your GPU has **2GB or 4GB of VRAM**, the honest answer is simple: do not try to
+force FLUX.1 Schnell locally. Native runs will fail, and quantized runs will still
+crash into out-of-memory errors.
+
+The cheapest useful path is cloud VRAM. Instead of fighting obsolete local hardware,
+rent a **16GB or 24GB GPU** on RunPod or Vast.ai. Spot and community-market instances
+can start around **$0.20/hr**, which is enough to test FLUX.1 Schnell properly without
+buying a new GPU.
 
 ## What can you run locally on 2GB/4GB VRAM?
 
